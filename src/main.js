@@ -17,8 +17,8 @@ module.exports = async function (req, res) {
   }
 
   client
-    .setEndpoint(req.variables['APPWRITE_FUNCTION_ENDPOINT'])
-    .setProject(req.variables['APPWRITE_FUNCTION_PROJECT_ID'])
+    .setEndpoint(req.variables['https://cloud.appwrite.io/v1'])
+    .setProject(req.variables['667042580023efd88353'])
     .setKey(req.variables['APPWRITE_FUNCTION_API_KEY']);
 
   try {
