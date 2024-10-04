@@ -19,7 +19,7 @@ module.exports = async function (req, res) {
   client
     .setEndpoint(req.variables['https://cloud.appwrite.io/v1'])
     .setProject(req.variables['667042580023efd88353'])
-    .setKey(req.variables['APPWRITE_FUNCTION_API_KEY']);
+    .setKey(req.variables['67002b08002fad684a7e']);
 
   try {
     // 从 pay 集合中获取支付凭证
