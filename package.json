@@ -1,16 +1,18 @@
 {
-  "name": "starter-template",
+  "name": "appwrite-function-generate-payment-qr",
   "version": "1.0.0",
-  "description": "",
-  "main": "src/main.js",
-  "type": "module",
+  "description": "Generate payment QR code for YunGouOS",
+  "main": "src/index.js",
   "scripts": {
-    "format": "prettier --write ."
+    "test": "echo \"Error: no test specified\" && exit 1"
   },
+  "keywords": [
+    "appwrite",
+    "function"
+  ],
   "dependencies": {
-    "node-appwrite": "^12.0.1"
+    "node-appwrite": "^9.0.0",
+    "node-fetch": "^3.3.1"
   },
-  "devDependencies": {
-    "prettier": "^3.2.5"
-  }
+  "devDependencies": {}
 }
