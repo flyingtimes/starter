@@ -1,57 +1,58 @@
 const sdk = require('node-appwrite');
 const crypto = require('crypto');
 
-/*
-  'req' variable has:
-    'headers' - object with request headers
-    'payload' - request body data as a string
-    'variables' - object with function variables
-
-  'res' variable has:
-    'send(text, status)' - function to return text response. Status code defaults to 200
-    'json(obj, status)' - function to return JSON response. Status code defaults to 200
-  
-  If an error is thrown, a response with code 500 will be returned.
-*/
-
 module.exports = async function (req, res) {
   const client = new sdk.Client();
+  const databases = new sdk.Databases(client);
 
   if (
     !req.variables['APPWRITE_FUNCTION_ENDPOINT'] ||
-    !req.variables['APPWRITE_FUNCTION_API_KEY']
+    !req.variables['APPWRITE_FUNCTION_API_KEY'] ||
+    !req.variables['APPWRITE_FUNCTION_PROJECT_ID'] ||
+    !req.variables['APPWRITE_DATABASE_ID'] ||
+    !req.variables['APPWRITE_PAY_COLLECTION_ID']
   ) {
     console.warn("Environment variables are not set. Function cannot use Appwrite SDK.");
-  } else {
-    client
-      .setEndpoint(req.variables['APPWRITE_FUNCTION_ENDPOINT'])
-      .setProject(req.variables['APPWRITE_FUNCTION_PROJECT_ID'])
-      .setKey(req.variables['APPWRITE_FUNCTION_API_KEY']);
+    return res.json({ error: 'Server configuration error' }, 500);
   }
 
-  const yungouosMchId = req.variables['YUNGOUOS_MCH_ID'];
-  const yungouosKey = req.variables['YUNGOUOS_KEY'];
-
-  if (!yungouosMchId || !yungouosKey) {
-    return res.json({ error: 'Missing YunGouOS credentials' }, 400);
-  }
-
-  const outTradeNo = `TOKEN${Date.now()}`;
-  const totalFee = '100'; // 1元，单位为分
-  const body = 'Purchase Token';
-
-  const params = {
-    out_trade_no: outTradeNo,
-    total_fee: totalFee,
-    mch_id: yungouosMchId,
-    body: body,
-    type: '2', // 返回base64图片
-  };
-
-  const sign = calculateSign(params, yungouosKey);
-  params.sign = sign;
+  client
+    .setEndpoint(req.variables['APPWRITE_FUNCTION_ENDPOINT'])
+    .setProject(req.variables['APPWRITE_FUNCTION_PROJECT_ID'])
+    .setKey(req.variables['APPWRITE_FUNCTION_API_KEY']);
 
   try {
+    // 从 pay 集合中获取支付凭证
+    const payCredentials = await databases.listDocuments(
+      req.variables['APPWRITE_DATABASE_ID'],
+      req.variables['APPWRITE_PAY_COLLECTION_ID']
+    );
+
+    if (payCredentials.documents.length === 0) {
+      return res.json({ error: 'Payment credentials not found' }, 400);
+    }
+
+    const { yungouos_mch_id, yungouos_key } = payCredentials.documents[0];
+
+    if (!yungouos_mch_id || !yungouos_key) {
+      return res.json({ error: 'Invalid payment credentials' }, 400);
+    }
+
+    const outTradeNo = `TOKEN${Date.now()}`;
+    const totalFee = '100'; // 1元，单位为分
+    const body = 'Purchase Token';
+
+    const params = {
+      out_trade_no: outTradeNo,
+      total_fee: totalFee,
+      mch_id: yungouos_mch_id,
+      body: body,
+      type: '2', // 返回base64图片
+    };
+
+    const sign = calculateSign(params, yungouos_key);
+    params.sign = sign;
+
     const response = await fetch('https://api.pay.yungouos.com/api/pay/wxpay/codePay', {
       method: 'POST',
       headers: {
@@ -68,7 +69,7 @@ module.exports = async function (req, res) {
       return res.json({ error: data.msg }, 400);
     }
   } catch (error) {
-    console.error('Error calling payment API:', error);
+    console.error('Error:', error);
     return res.json({ error: 'Failed to generate QR code' }, 500);
   }
 };
