@@ -5,16 +5,7 @@ module.exports = async function (req, res) {
   const client = new sdk.Client();
   const databases = new sdk.Databases(client);
 
-  if (
-    !req.variables['APPWRITE_FUNCTION_ENDPOINT'] ||
-    !req.variables['APPWRITE_FUNCTION_API_KEY'] ||
-    !req.variables['APPWRITE_FUNCTION_PROJECT_ID'] ||
-    !req.variables['APPWRITE_DATABASE_ID'] ||
-    !req.variables['APPWRITE_PAY_COLLECTION_ID']
-  ) {
-    console.warn("Environment variables are not set. Function cannot use Appwrite SDK.");
-    return res.json({ error: 'Server configuration error' }, 500);
-  }
+
 
   client
     .setEndpoint(req.variables['https://cloud.appwrite.io/v1'])
