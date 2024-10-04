@@ -4,9 +4,6 @@ const crypto = require('crypto');
 module.exports = async function (req, res) {
   const client = new sdk.Client();
   const databases = new sdk.Databases(client);
-
-
-
   client
     .setEndpoint(req.variables['https://cloud.appwrite.io/v1'])
     .setProject(req.variables['667042580023efd88353'])
