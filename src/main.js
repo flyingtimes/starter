@@ -24,8 +24,8 @@ module.exports = async function (req, res) {
   try {
     // 从 pay 集合中获取支付凭证
     const payCredentials = await databases.listDocuments(
-      req.variables['APPWRITE_DATABASE_ID'],
-      req.variables['APPWRITE_PAY_COLLECTION_ID']
+      req.variables['6670429f002270322b0d'],
+      req.variables['67002d4f003e28f83d0b']
     );
 
     if (payCredentials.documents.length === 0) {
